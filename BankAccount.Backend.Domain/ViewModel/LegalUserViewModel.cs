@@ -6,6 +6,8 @@ namespace BankAccount.Backend.Domain.ViewModel
 {
     public class LegalUserViewModel
     {
+        [Display(Name = "ID юр. лица")]
+        public int Id { get; set; }
         [Display (Name = "Название организации")]
         public string OrganizationName { get; set; }
         [Display(Name = "Адрес")]

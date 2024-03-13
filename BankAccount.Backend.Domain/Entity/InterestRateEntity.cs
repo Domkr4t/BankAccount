@@ -2,10 +2,10 @@
 
 namespace BankAccount.Backend.Domain.Entity
 {
-    public class TypeListUserEntity
+    public class InterestRateEntity
     {
         public int Id { get; set; }
-        public TypeUser TypeUser { get; set; }
-        public List<ClientEntity> User { get; set; }
+        public AccountType AccountType { get; set; }
+        public decimal Rate { get; set; }
     }
 }

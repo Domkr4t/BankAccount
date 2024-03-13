@@ -15,6 +15,7 @@ namespace BankAccount.Backend.Domain.Entity
         public Gender Gender { get; set; }
         public string? Photo { get; set; }
         public bool IsStuff { get; set; }
+        public bool IsDebtor { get; set; }
         public int ClientID { get; set; }
         public ClientEntity? Client { get; set; }
     }

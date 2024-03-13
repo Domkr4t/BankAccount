@@ -1,11 +1,12 @@
-﻿using BankAccount.Backend.Domain.Entity;
-using BankAccount.Backend.Domain.Enum;
+﻿using BankAccount.Backend.Domain.Enum;
 using System.ComponentModel.DataAnnotations;
 
 namespace BankAccount.Backend.Domain.ViewModel
 {
     public class PhisycalUserViewModel
     {
+        [Display(Name = "ID физ. лица")]
+        public int Id { get; set; }
         [Display(Name = "Фамилия")]
         public string Lastname { get; set; }
         [Display(Name = "Имя")]
@@ -26,5 +27,7 @@ namespace BankAccount.Backend.Domain.ViewModel
         public string Photo { get; set; }
         [Display(Name = "Является ли сотрудником банка")]
         public bool IsStuff { get; set; }
+        [Display(Name = "Является ли должником")]
+        public bool IsDebtor { get; set; }
     }
 }

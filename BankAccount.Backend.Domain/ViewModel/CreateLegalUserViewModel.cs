@@ -10,7 +10,6 @@ namespace BankAccount.Backend.Domain.ViewModel
         public string СhiefFullname { get; set; }
         public string AccountantFullname { get; set; }
         public FormOfOwnership FormOfOwnership { get; set; }
-        public int ClientID { get; set; }
 
         public void Validate()
         {

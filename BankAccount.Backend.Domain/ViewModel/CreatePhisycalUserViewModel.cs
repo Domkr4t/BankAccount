@@ -1,5 +1,4 @@
-﻿using BankAccount.Backend.Domain.Entity;
-using BankAccount.Backend.Domain.Enum;
+﻿using BankAccount.Backend.Domain.Enum;
 
 namespace BankAccount.Backend.Domain.ViewModel
 {
@@ -15,7 +14,6 @@ namespace BankAccount.Backend.Domain.ViewModel
         public Gender Gender { get; set; }
         public string? Photo { get; set; }
         public bool IsStuff { get; set; }
-        public int ClientID { get; set; }
 
         public void Validate()
         {
