@@ -7,8 +7,8 @@ namespace BankAccount.Backend.Domain.ViewModel
     {
         public int Id { get; set; }
         public string AccountNumber { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public float Balance { get; set; }
+        public long CreatedAt { get; set; }
+        public decimal Balance { get; set; }
         public AccountType AccountType { get; set; }
         public int? CreditLimit { get; set; }
         public int ClientID { get; set; }

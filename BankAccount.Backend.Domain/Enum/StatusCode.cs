@@ -11,6 +11,9 @@
         LegalClientAlreadyExists = 21,
         LegalClientNotFound = 22,
 
+        PhisycalClientAlreadyExists = 23,
+        PhisycalClientNotFound = 24,
+
         Ok = 200,
         InternalServerError = 500
     }

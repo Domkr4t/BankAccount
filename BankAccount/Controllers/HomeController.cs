@@ -16,7 +16,7 @@ namespace BankAccount.Controllers
             _bankService = bankService;
         }
 
-        [Route("/CreateLegalUser")]
+        [Route("CreateLegalUser")]
         [HttpPost]
         public async Task<IActionResult> CreateLegalUser([FromBody]CreateLegalUserViewModel model) 
         { 
@@ -31,7 +31,7 @@ namespace BankAccount.Controllers
 
         [Route("/DeleteLegalUser")]
         [HttpPost]
-        public async Task<IActionResult> DeleteLegalUser(int id) 
+        public async Task<IActionResult> DeleteLegalUser([FromQuery] int id) 
         {
             var response = await _bankService.DeleteLegalUser(id);
 
@@ -42,7 +42,7 @@ namespace BankAccount.Controllers
             return BadRequest(new { description = response.Description });
         }
 
-        [Route("/UpdateLegalUser")]
+        [Route("UpdateLegalUser")]
         [HttpPut]
         public async Task<IActionResult> UpdateLegalUser(UpdateLegalUserViewModel model)
         {
@@ -55,7 +55,7 @@ namespace BankAccount.Controllers
             return BadRequest(new { description = response.Description });
         }
 
-        [Route("/GetAllLegalUsers")]
+        [Route("GetAllLegalUsers")]
         [HttpGet]
         public async Task<IActionResult> GetAllLegalUsers()
         {
@@ -63,7 +63,7 @@ namespace BankAccount.Controllers
             return Json(new { data = response.Data});
         }
 
-        [Route("/PatchLegalUser")]
+        [Route("PatchLegalUser")]
         [HttpPatch]
         public async Task<IActionResult> PatchLegalUser(UpdateLegalUserViewModel model)
         {
@@ -77,7 +77,7 @@ namespace BankAccount.Controllers
         }
 
 
-        [Route("/CreateAccount")]
+        [Route("CreateAccount")]
         [HttpPost]
         public async Task<IActionResult> CreateAccount(CreateAccountViewModel model)
         {
@@ -90,9 +90,9 @@ namespace BankAccount.Controllers
             return BadRequest(new { description = response.Description });
         }
 
-        [Route("/DeleteAccount")]
+        [Route("DeleteAccount")]
         [HttpPost]
-        public async Task<IActionResult> DeleteAccount(int id)
+        public async Task<IActionResult> DeleteAccount([FromQuery] int id)
         {
             var response = await _bankService.DeleteAccount(id);
 
@@ -103,7 +103,7 @@ namespace BankAccount.Controllers
             return BadRequest(new { description = response.Description });
         }
 
-        [Route("/UpdateAccount")]
+        [Route("UpdateAccount")]
         [HttpPut]
         public async Task<IActionResult> UpdateAccount(UpdateAccountViewModel model)
         {
@@ -116,7 +116,7 @@ namespace BankAccount.Controllers
             return BadRequest(new { description = response.Description });
         }
 
-        [Route("/GetAllAccount")]
+        [Route("GetAllAccounts")]
         [HttpGet]
         public async Task<IActionResult> GetAllAccount()
         {
@@ -124,7 +124,7 @@ namespace BankAccount.Controllers
             return Json(new { data = response.Data });
         }
 
-        [Route("/PatchAccount")]
+        [Route("PatchAccount")]
         [HttpPatch]
         public async Task<IActionResult> PatchAccount(UpdateAccountViewModel model)
         {
@@ -137,6 +137,12 @@ namespace BankAccount.Controllers
             return BadRequest(new { description = response.Description });
         }
 
-
+        [Route("GetOneClient")]
+        [HttpGet]
+        public async Task<IActionResult> GetOneClient([FromQuery] int id)
+        {
+            var response = await _bankService.GetOneClient(id);
+            return Json(new { data = response.Data });
+        }
     }
 }

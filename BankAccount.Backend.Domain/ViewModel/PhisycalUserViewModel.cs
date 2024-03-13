@@ -14,7 +14,7 @@ namespace BankAccount.Backend.Domain.ViewModel
         [Display(Name = "Отчество")]
         public string Middlename { get; set; }
         [Display(Name = "Дата рождения")]
-        public DateTime Birthday { get; set; }
+        public long Birthday { get; set; }
         [Display(Name = "Адрес")]
         public string Address { get; set; }
         [Display(Name = "Телефон")]

@@ -11,6 +11,7 @@ namespace BankAccount.Backend.Services.Interfaces
         Task<IBankResponse<IEnumerable<LegalUserViewModel>>> GetAllLegalUsers();
         Task<IBankResponse<UpdateLegalUserViewModel>> PatchLegalUser(UpdateLegalUserViewModel model);
 
+        Task<IBankResponse<ClientViewModel>> GetOneClient(int id);
 
         Task<IBankResponse<CreateAccountViewModel>> CreateAccount(CreateAccountViewModel model);
         Task<IBankResponse<AccountViewModel>> DeleteAccount(int id);

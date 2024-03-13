@@ -1,13 +1,13 @@
 ﻿using BankAccount.Backend.DAL.Interfaces;
+using BankAccount.Backend.DAL.Repositories;
 using BankAccount.Backend.Domain.Entity;
 using BankAccount.Backend.Domain.Enum;
+using BankAccount.Backend.Domain.Extentions;
 using BankAccount.Backend.Domain.Response;
 using BankAccount.Backend.Domain.ViewModel;
 using BankAccount.Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
-using System.Security.Principal;
-using System.Xml.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace BankAccount.Backend.Services.Implementations
 {
@@ -16,12 +16,14 @@ namespace BankAccount.Backend.Services.Implementations
         private readonly IBaseRepository<LegalUserEntity> _legalUserRepository;
         private readonly IBaseRepository<AccountEntity> _accountRepository;
         private readonly IBaseRepository<ClientEntity> _clientRepository;
+        private readonly IBaseRepository<PhisycalUserEntity> _phisycalUserRepository;
 
-        public BankService(IBaseRepository<LegalUserEntity> legalUserRepository, IBaseRepository<AccountEntity> accountRepository, IBaseRepository<ClientEntity> clientRepository)
+        public BankService(IBaseRepository<LegalUserEntity> legalUserRepository, IBaseRepository<AccountEntity> accountRepository, IBaseRepository<ClientEntity> clientRepository, IBaseRepository<PhisycalUserEntity> phisycalUserRepository)
         {
             _legalUserRepository = legalUserRepository;
             _accountRepository = accountRepository;
             _clientRepository = clientRepository;
+            _phisycalUserRepository = phisycalUserRepository;
         }
 
         public async Task<IBankResponse<CreateAccountViewModel>> CreateAccount(CreateAccountViewModel model)
@@ -50,10 +52,12 @@ namespace BankAccount.Backend.Services.Implementations
                     };
                 }
 
+                long unixTime = DateTimeOffset.Now.ToUnixTimeSeconds();
+
                 account = new AccountEntity
                 {
                     AccountNumber = model.AccountNumber,
-                    CreatedAt = DateTime.Now,
+                    CreatedAt = unixTime,
                     Balance = model.Balance,
                     AccountType = model.AccountType,
                     CreditLimit = model.CreditLimit,
@@ -167,23 +171,28 @@ namespace BankAccount.Backend.Services.Implementations
         {
             try
             {
-                var legalUser = await _legalUserRepository.GetAll().FirstOrDefaultAsync(x => x.Id == id);
+                var legalClient = await _legalUserRepository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == id);
 
-                if (legalUser == null)
+                var client = await _clientRepository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (client == null || legalClient == null)
                 {
                     return new BankResponse<LegalUserViewModel>
                     {
-                        Description = $"Юридическое лицо с ID {id} не существует",
-                        StatusCode = StatusCode.LegalClientNotFound
+                        Description = $"Юридического лица с ID {id} не существует.",
+                        StatusCode = StatusCode.LegalClientNotFound,
                     };
                 }
 
-                await _legalUserRepository.Delete(legalUser);
+                await _legalUserRepository.Delete(legalClient);
+                await _clientRepository.Delete(client);
 
                 return new BankResponse<LegalUserViewModel>
                 {
-                    Description = $"Юридическое лицо с ID {id} удалено",
-                    StatusCode = StatusCode.Ok
+                    Description = $"Юридическое лицо с ID {id} удалено.",
+                    StatusCode = StatusCode.Ok,
                 };
             }
             catch (Exception ex) 
@@ -411,6 +420,162 @@ namespace BankAccount.Backend.Services.Implementations
                 {
                     Description = ex.Message,
                     StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
+        public async Task<IBankResponse<ClientViewModel>> GetOneClient(int id)
+        {
+            try
+            {
+                var client = await _clientRepository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (client == null)
+                {
+                    return new BankResponse<ClientViewModel>
+                    {
+                        Description = $"Клиента с Id = {id} не существует",
+                        StatusCode = StatusCode.ClientNotFound,
+                    };
+                }
+
+                if (client.Type == ClientType.Phisycal)
+                {
+                    var phisycalClient = await _phisycalUserRepository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                    if (phisycalClient == null)
+                    {
+                        return new BankResponse<ClientViewModel>
+                        {
+                            Description = $"Физического лица с Id = {id} не существует",
+                            StatusCode = StatusCode.PhisycalClientNotFound,
+                        };
+                    }
+
+                    var clientFullname = string.Join(" ",
+                        new List<string>()
+                        {
+                        phisycalClient.Lastname.ToLower(),
+                        phisycalClient.Name.ToLower(),
+                        phisycalClient.Middlename.ToLower()
+                        }
+                    );
+
+                    var legalUserClient = await _legalUserRepository.GetAll()
+                        .FirstOrDefaultAsync(x => x.СhiefFullname.ToLower() == clientFullname);
+
+                    var phisycalClientViewModel = new PhisycalUserViewModel
+                    {
+                        Id = phisycalClient.Id,
+                        Lastname = phisycalClient.Lastname,
+                        Name = phisycalClient.Name,
+                        Middlename = phisycalClient.Middlename,
+                        Birthday = phisycalClient.Birthday,
+                        Address = phisycalClient.Address,
+                        Number = phisycalClient.Number,
+                        Gender = phisycalClient.Gender,
+                        Photo = phisycalClient.Photo,
+                        IsStuff = phisycalClient.IsStuff,
+                        IsDebtor = phisycalClient.IsDebtor,
+                    };
+
+                    LegalUserViewModel legalUserViewModel = null;
+
+                    if (legalUserClient != null)
+                    {
+                        legalUserViewModel = new LegalUserViewModel
+                        {
+                            Id = legalUserClient.Id,
+                            OrganizationName = legalUserClient.OrganizationName,
+                            Address = legalUserClient.Address,
+                            СhiefFullname = legalUserClient.СhiefFullname,
+                            AccountantFullname = legalUserClient.AccountantFullname,
+                            FormOfOwnership = legalUserClient.FormOfOwnership,
+                        };
+                    }
+
+                    var clientViewModel = new ClientViewModel()
+                    {
+                        LegalUser = legalUserViewModel,
+                        PhisycalUser = phisycalClientViewModel,
+                    };
+
+                    return new BankResponse<ClientViewModel>
+                    {
+                        Data = clientViewModel,
+                        StatusCode = StatusCode.Ok,
+                    };
+                }
+                else
+                {
+                    var legalUser = await _legalUserRepository.GetAll()
+                        .FirstOrDefaultAsync(x => x.Id == id);
+
+                    if (legalUser == null)
+                    {
+                        return new BankResponse<ClientViewModel>
+                        {
+                            Description = $"Юридического лица с Id = {id} не существует",
+                            StatusCode = StatusCode.LegalClientNotFound,
+                        };
+                    }
+
+                    var clientFullname = legalUser.СhiefFullname.Split(" ");
+
+                    var phisycalUser = await _phisycalUserRepository.GetAll()
+                        .FirstOrDefaultAsync(x => x.Lastname.ToLower() == clientFullname[0].ToLower() && x.Name.ToLower() == clientFullname[1].ToLower() &&
+                            x.Middlename.ToLower() == clientFullname[2].ToLower());
+
+                    var legalClientViewModel = new LegalUserViewModel()
+                    {
+                        Id = legalUser.Id,
+                        OrganizationName = legalUser.OrganizationName,
+                        Address = legalUser.Address,
+                        СhiefFullname = legalUser.СhiefFullname,
+                        AccountantFullname = legalUser.AccountantFullname,
+                        FormOfOwnership = legalUser.FormOfOwnership,
+                    };
+
+                    PhisycalUserViewModel phisycalUserViewModel = null;
+                    if (phisycalUser != null)
+                    {
+                        phisycalUserViewModel = new PhisycalUserViewModel
+                        {
+                            Id = phisycalUser.Id,
+                            Lastname = phisycalUser.Lastname,
+                            Name = phisycalUser.Name,
+                            Middlename = phisycalUser.Middlename,
+                            Birthday = phisycalUser.Birthday,
+                            Address = phisycalUser.Address,
+                            Number = phisycalUser.Number,
+                            Gender = phisycalUser.Gender,
+                            Photo = phisycalUser.Photo,
+                            IsStuff = phisycalUser.IsStuff,
+                            IsDebtor = phisycalUser.IsDebtor,
+                        };
+                    }
+
+                    var clientViewModel = new ClientViewModel()
+                    {
+                        LegalUser = legalClientViewModel,
+                        PhisycalUser = phisycalUserViewModel,
+                    };
+
+                    return new BankResponse<ClientViewModel>
+                    {
+                        Data = clientViewModel,
+                        StatusCode = StatusCode.Ok,
+                    };
+                }
+            }
+            catch (Exception exception)
+            {
+                return new BankResponse<ClientViewModel>
+                {
+                    Description = $"{exception.Message}",
+                    StatusCode = StatusCode.InternalServerError,
                 };
             }
         }
