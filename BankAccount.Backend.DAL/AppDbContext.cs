@@ -1,5 +1,6 @@
 ﻿using BankAccount.Backend.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BankAccount.Backend.DAL
 {
@@ -19,4 +20,5 @@ namespace BankAccount.Backend.DAL
         public DbSet<InterestRateEntity> InterestRates { get; set; }
 
     }
+
 }

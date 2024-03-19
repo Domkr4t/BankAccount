@@ -1,5 +1,4 @@
 ﻿using BankAccount.Backend.DAL.Interfaces;
-using BankAccount.Backend.DAL.Repositories;
 using BankAccount.Backend.Domain.Entity;
 using BankAccount.Backend.Domain.Enum;
 using BankAccount.Backend.Domain.Extentions;
@@ -7,7 +6,6 @@ using BankAccount.Backend.Domain.Response;
 using BankAccount.Backend.Domain.ViewModel;
 using BankAccount.Backend.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace BankAccount.Backend.Services.Implementations
 {
@@ -134,6 +132,72 @@ namespace BankAccount.Backend.Services.Implementations
             }
         }
 
+        public async Task<IBankResponse<CreatePhisycalUserViewModel>> CreatePhisycalUser(CreatePhisycalUserViewModel model)
+        {
+            try
+            {
+                var phisycalUser = await _phisycalUserRepository.GetAll().FirstOrDefaultAsync(x => x.Number == model.Number);
+
+                var phisycalUserFullname = string.Join(" ",
+                        new List<string>()
+                        {
+                        model.Lastname.ToLower(),
+                        model.Name.ToLower(),
+                        model.Middlename.ToLower()
+                        }
+                    );
+
+                if (phisycalUser != null)
+                {
+                    return new BankResponse<CreatePhisycalUserViewModel>
+                    {
+                        Description = $"Физическое лицо {phisycalUserFullname} уже существует",
+                        StatusCode = StatusCode.PhisycalClientAlreadyExists
+                    };
+                }
+
+                var client = new ClientEntity
+                {
+                    Type = ClientType.Phisycal
+                };
+
+                await _clientRepository.Create(client);
+
+                phisycalUser = new PhisycalUserEntity
+                {
+                    Lastname = model.Lastname, 
+                    Name = model.Name,
+                    Middlename = model.Middlename,
+                    Birthday = model.Birthday.Value,
+                    Address = model.Address,
+                    Number = model.Number,
+                    Email = model.Email,
+                    Gender = model.Gender,
+                    Photo = model.Photo,
+                    IsStuff = model.IsStuff,
+                    IsDebtor = false,
+                    ClientID = client.Id,
+                    Client = client,
+                };
+
+                await _phisycalUserRepository.Create(phisycalUser);
+
+                return new BankResponse<CreatePhisycalUserViewModel>
+                {
+                    Description = $"Физическое лицо {phisycalUserFullname} создано",
+                    StatusCode = StatusCode.Ok
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BankResponse<CreatePhisycalUserViewModel>
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
         public async Task<IBankResponse<AccountViewModel>> DeleteAccount(int id)
         {
             try
@@ -205,6 +269,44 @@ namespace BankAccount.Backend.Services.Implementations
             }
         }
 
+        public async Task<IBankResponse<PhisycalUserViewModel>> DeletePhisycalUser(int id)
+        {
+            try
+            {
+                var phisycalUser = await _phisycalUserRepository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                var client = await _clientRepository.GetAll()
+                    .FirstOrDefaultAsync(x => x.Id == id);
+
+                if (client == null || phisycalUser == null)
+                {
+                    return new BankResponse<PhisycalUserViewModel>
+                    {
+                        Description = $"Физического лица с ID {id} не существует.",
+                        StatusCode = StatusCode.PhisycalClientNotFound,
+                    };
+                }
+
+                await _phisycalUserRepository.Delete(phisycalUser);
+                await _clientRepository.Delete(client);
+
+                return new BankResponse<PhisycalUserViewModel>
+                {
+                    Description = $"Физическое лицо с ID {id} удалено.",
+                    StatusCode = StatusCode.Ok,
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BankResponse<PhisycalUserViewModel>
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
         public async Task<IBankResponse<IEnumerable<AccountViewModel>>> GetAllAccount()
         {
             try
@@ -259,6 +361,42 @@ namespace BankAccount.Backend.Services.Implementations
             catch (Exception ex)
             {
                 return new BankResponse<IEnumerable<LegalUserViewModel>>
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
+        public async Task<IBankResponse<IEnumerable<PhisycalUserViewModel>>> GetAllPhisycalUsers()
+        {
+            try
+            {
+                var phisycalUsers = await _phisycalUserRepository.GetAll().Select(x => new PhisycalUserViewModel
+                {
+                    Id = x.Id,
+                    Lastname = x.Lastname,
+                    Name = x.Name,
+                    Middlename = x.Middlename,
+                    Birthday = x.Birthday.Date,
+                    Address = x.Address,
+                    Number = x.Number,
+                    Email = x.Email,
+                    Gender = x.Gender.GetDisplayName(),
+                    Photo = x.Photo,
+                    IsStuff = x.IsStuff,
+                    IsDebtor = x.IsDebtor,
+                }).ToListAsync();
+
+                return new BankResponse<IEnumerable<PhisycalUserViewModel>>
+                {
+                    Data = phisycalUsers,
+                    StatusCode = StatusCode.Ok
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BankResponse<IEnumerable<PhisycalUserViewModel>>
                 {
                     Description = ex.Message,
                     StatusCode = StatusCode.InternalServerError
@@ -345,6 +483,52 @@ namespace BankAccount.Backend.Services.Implementations
             }
         }
 
+        public async Task<IBankResponse<UpdatePhisycalUserViewModel>> PatchPhisycalUser(UpdatePhisycalUserViewModel model)
+        {
+            try
+            {
+                var phisycalUser = await _phisycalUserRepository.GetAll().FirstOrDefaultAsync(x => x.Id == model.Id);
+
+                if (phisycalUser == null)
+                {
+                    return new BankResponse<UpdatePhisycalUserViewModel>
+                    {
+                        Description = $"Физическое лицо с ID {model.Id} не существует",
+                        StatusCode = StatusCode.PhisycalClientNotFound
+                    };
+                }
+
+                phisycalUser.Lastname = phisycalUser.Lastname == null ? phisycalUser.Lastname : model.Lastname;
+                phisycalUser.Name = phisycalUser.Name == null ? phisycalUser.Name : model.Name;
+                phisycalUser.Middlename = phisycalUser.Middlename == null ? phisycalUser.Middlename : model.Middlename;
+                phisycalUser.Birthday = phisycalUser.Birthday == null ? phisycalUser.Birthday.Date : model.Birthday.Value.Date;
+                phisycalUser.Address = phisycalUser.Address == null ? phisycalUser.Address : model.Address;
+                phisycalUser.Number = phisycalUser.Number == null ? phisycalUser.Number : model.Number;
+                phisycalUser.Email = phisycalUser.Email == null ? phisycalUser.Email : model.Email;
+                phisycalUser.Gender = phisycalUser.Gender == null ? phisycalUser.Gender : model.Gender.Value;
+                phisycalUser.Photo = phisycalUser.Photo == null ? phisycalUser.Photo : model.Photo;
+                phisycalUser.IsStuff = phisycalUser.IsStuff == null ? phisycalUser.IsStuff : model.IsStuff.Value;
+                phisycalUser.IsDebtor = phisycalUser.IsDebtor == null ? phisycalUser.IsDebtor : model.IsDebtor.Value;
+                phisycalUser.ClientID = phisycalUser.ClientID == null ? phisycalUser.ClientID : model.ClientID.Value;
+
+                await _phisycalUserRepository.Update(phisycalUser);
+
+                return new BankResponse<UpdatePhisycalUserViewModel>
+                {
+                    Description = $"Физическое лицо с ID {model.Id} изменено",
+                    StatusCode = StatusCode.Ok
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BankResponse<UpdatePhisycalUserViewModel>
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
         public async Task<IBankResponse<UpdateAccountViewModel>> UpdateAccount(UpdateAccountViewModel model)
         {
             try
@@ -424,6 +608,52 @@ namespace BankAccount.Backend.Services.Implementations
             }
         }
 
+        public async Task<IBankResponse<UpdatePhisycalUserViewModel>> UpdatePhisycalUser(UpdatePhisycalUserViewModel model)
+        {
+            try
+            {
+                var phisycalUser = await _phisycalUserRepository.GetAll().FirstOrDefaultAsync(x => x.Id == model.Id);
+
+                if (phisycalUser == null)
+                {
+                    return new BankResponse<UpdatePhisycalUserViewModel>
+                    {
+                        Description = $"Физическое лицо с ID {model.Id} не существует",
+                        StatusCode = StatusCode.PhisycalClientNotFound
+                    };
+                }
+
+                phisycalUser.Lastname = model.Lastname;
+                phisycalUser.Name = model.Name;
+                phisycalUser.Middlename = model.Middlename;
+                phisycalUser.Birthday = model.Birthday.Value.Date;
+                phisycalUser.Address = model.Address;
+                phisycalUser.Number = model.Number;
+                phisycalUser.Email = model.Email;
+                phisycalUser.Gender = model.Gender.Value;
+                phisycalUser.Photo = model.Photo;
+                phisycalUser.IsStuff = model.IsStuff.Value;
+                phisycalUser.IsDebtor = model.IsDebtor.Value;
+                phisycalUser.ClientID = model.ClientID.Value;
+
+                await _phisycalUserRepository.Update(phisycalUser);
+
+                return new BankResponse<UpdatePhisycalUserViewModel>
+                {
+                    Description = $"Физическое лицо с ID {model.Id} изменено",
+                    StatusCode = StatusCode.Ok
+                };
+            }
+            catch (Exception ex)
+            {
+                return new BankResponse<UpdatePhisycalUserViewModel>
+                {
+                    Description = ex.Message,
+                    StatusCode = StatusCode.InternalServerError
+                };
+            }
+        }
+
         public async Task<IBankResponse<ClientViewModel>> GetOneClient(int id)
         {
             try
@@ -475,7 +705,7 @@ namespace BankAccount.Backend.Services.Implementations
                         Birthday = phisycalClient.Birthday,
                         Address = phisycalClient.Address,
                         Number = phisycalClient.Number,
-                        Gender = phisycalClient.Gender,
+                        Gender = phisycalClient.Gender.GetDisplayName(),
                         Photo = phisycalClient.Photo,
                         IsStuff = phisycalClient.IsStuff,
                         IsDebtor = phisycalClient.IsDebtor,
@@ -550,7 +780,7 @@ namespace BankAccount.Backend.Services.Implementations
                             Birthday = phisycalUser.Birthday,
                             Address = phisycalUser.Address,
                             Number = phisycalUser.Number,
-                            Gender = phisycalUser.Gender,
+                            Gender = phisycalUser.Gender.GetDisplayName(),
                             Photo = phisycalUser.Photo,
                             IsStuff = phisycalUser.IsStuff,
                             IsDebtor = phisycalUser.IsDebtor,

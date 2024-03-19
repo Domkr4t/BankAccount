@@ -14,7 +14,7 @@ namespace BankAccount.Backend.Domain.ViewModel
         [Display(Name = "Отчество")]
         public string Middlename { get; set; }
         [Display(Name = "Дата рождения")]
-        public long Birthday { get; set; }
+        public DateTime Birthday { get; set; }
         [Display(Name = "Адрес")]
         public string Address { get; set; }
         [Display(Name = "Телефон")]
@@ -22,7 +22,7 @@ namespace BankAccount.Backend.Domain.ViewModel
         [Display(Name = "Электронная почта")]
         public string Email { get; set; }
         [Display(Name = "Пол")]
-        public Gender Gender { get; set; }
+        public string Gender { get; set; }
         [Display(Name = "Фотография")]
         public string Photo { get; set; }
         [Display(Name = "Является ли сотрудником банка")]

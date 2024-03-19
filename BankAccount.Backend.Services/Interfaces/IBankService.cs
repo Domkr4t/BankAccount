@@ -18,5 +18,11 @@ namespace BankAccount.Backend.Services.Interfaces
         Task<IBankResponse<UpdateAccountViewModel>> UpdateAccount(UpdateAccountViewModel model);
         Task<IBankResponse<IEnumerable<AccountViewModel>>> GetAllAccount();
         Task<IBankResponse<UpdateAccountViewModel>> PatchAccount(UpdateAccountViewModel model);
+
+        Task<IBankResponse<CreatePhisycalUserViewModel>> CreatePhisycalUser(CreatePhisycalUserViewModel model);
+        Task<IBankResponse<PhisycalUserViewModel>> DeletePhisycalUser(int id);
+        Task<IBankResponse<UpdatePhisycalUserViewModel>> UpdatePhisycalUser(UpdatePhisycalUserViewModel model);
+        Task<IBankResponse<IEnumerable<PhisycalUserViewModel>>> GetAllPhisycalUsers();
+        Task<IBankResponse<UpdatePhisycalUserViewModel>> PatchPhisycalUser(UpdatePhisycalUserViewModel model);
     }
 }

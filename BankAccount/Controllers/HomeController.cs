@@ -1,9 +1,7 @@
-﻿using BankAccount.Backend.Domain.Response;
-using BankAccount.Backend.Domain.ViewModel;
+﻿using BankAccount.Backend.Domain.ViewModel;
 using BankAccount.Backend.Services.Interfaces;
-using BankAccount.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+
 
 namespace BankAccount.Controllers
 {
@@ -29,7 +27,7 @@ namespace BankAccount.Controllers
             return BadRequest(new {description = response.Description });
         }
 
-        [Route("/DeleteLegalUser")]
+        [Route("DeleteLegalUser")]
         [HttpPost]
         public async Task<IActionResult> DeleteLegalUser([FromQuery] int id) 
         {
@@ -136,6 +134,68 @@ namespace BankAccount.Controllers
             }
             return BadRequest(new { description = response.Description });
         }
+
+
+        [Route("CreatePhisycalUser")]
+        [HttpPost]
+        public async Task<IActionResult> CreatePhisycalUser([FromBody] CreatePhisycalUserViewModel model)
+        {
+            var response = await _bankService.CreatePhisycalUser(model);
+
+            if (response.StatusCode == Backend.Domain.Enum.StatusCode.Ok)
+            {
+                return Ok(new { description = response.Description });
+            }
+            return BadRequest(new { description = response.Description });
+        }
+
+        [Route("DeletePhisycalUser")]
+        [HttpPost]
+        public async Task<IActionResult> DeletePhisycalUser([FromQuery] int id)
+        {
+            var response = await _bankService.DeletePhisycalUser(id);
+
+            if (response.StatusCode == Backend.Domain.Enum.StatusCode.Ok)
+            {
+                return Ok(new { description = response.Description });
+            }
+            return BadRequest(new { description = response.Description });
+        }
+
+        [Route("UpdatePhisycalUser")]
+        [HttpPut]
+        public async Task<IActionResult> UpdatePhisycalUser(UpdatePhisycalUserViewModel model)
+        {
+            var response = await _bankService.UpdatePhisycalUser(model);
+
+            if (response.StatusCode == Backend.Domain.Enum.StatusCode.Ok)
+            {
+                return Ok(new { description = response.Description });
+            }
+            return BadRequest(new { description = response.Description });
+        }
+
+        [Route("GetAllPhisycalUsers")]
+        [HttpGet]
+        public async Task<IActionResult> GetAllPhisycalUsers()
+        {
+            var response = await _bankService.GetAllPhisycalUsers();
+            return Json(new { data = response.Data });
+        }
+
+        [Route("PhisycalUser")]
+        [HttpPatch]
+        public async Task<IActionResult> PatchPhisycalUser(UpdatePhisycalUserViewModel model)
+        {
+            var response = await _bankService.PatchPhisycalUser(model);
+
+            if (response.StatusCode == Backend.Domain.Enum.StatusCode.Ok)
+            {
+                return Ok(new { description = response.Description });
+            }
+            return BadRequest(new { description = response.Description });
+        }
+
 
         [Route("GetOneClient")]
         [HttpGet]
