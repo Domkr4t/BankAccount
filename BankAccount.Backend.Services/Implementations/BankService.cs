@@ -141,9 +141,9 @@ namespace BankAccount.Backend.Services.Implementations
                 var phisycalUserFullname = string.Join(" ",
                         new List<string>()
                         {
-                        model.Lastname.ToLower(),
-                        model.Name.ToLower(),
-                        model.Middlename.ToLower()
+                        model.Lastname,
+                        model.Name,
+                        model.Middlename
                         }
                     );
 
@@ -168,7 +168,7 @@ namespace BankAccount.Backend.Services.Implementations
                     Lastname = model.Lastname, 
                     Name = model.Name,
                     Middlename = model.Middlename,
-                    Birthday = model.Birthday.Value,
+                    Birthday = model.Birthday.Date,
                     Address = model.Address,
                     Number = model.Number,
                     Email = model.Email,
@@ -350,6 +350,7 @@ namespace BankAccount.Backend.Services.Implementations
                     СhiefFullname = x.СhiefFullname,
                     AccountantFullname = x.AccountantFullname,
                     FormOfOwnership = x.FormOfOwnership,
+                    ClientID = x.ClientID
                 }).ToListAsync();
 
                 return new BankResponse<IEnumerable<LegalUserViewModel>>
@@ -378,7 +379,7 @@ namespace BankAccount.Backend.Services.Implementations
                     Lastname = x.Lastname,
                     Name = x.Name,
                     Middlename = x.Middlename,
-                    Birthday = x.Birthday.Date,
+                    Birthday = x.Birthday.ToString("dd/MM/yyyy"),
                     Address = x.Address,
                     Number = x.Number,
                     Email = x.Email,
@@ -386,6 +387,7 @@ namespace BankAccount.Backend.Services.Implementations
                     Photo = x.Photo,
                     IsStuff = x.IsStuff,
                     IsDebtor = x.IsDebtor,
+                    ClientID = x.ClientID,
                 }).ToListAsync();
 
                 return new BankResponse<IEnumerable<PhisycalUserViewModel>>
@@ -702,13 +704,14 @@ namespace BankAccount.Backend.Services.Implementations
                         Lastname = phisycalClient.Lastname,
                         Name = phisycalClient.Name,
                         Middlename = phisycalClient.Middlename,
-                        Birthday = phisycalClient.Birthday,
+                        Birthday = phisycalClient.Birthday.ToString("dd/MM/yyyy"),
                         Address = phisycalClient.Address,
                         Number = phisycalClient.Number,
                         Gender = phisycalClient.Gender.GetDisplayName(),
                         Photo = phisycalClient.Photo,
                         IsStuff = phisycalClient.IsStuff,
                         IsDebtor = phisycalClient.IsDebtor,
+                        ClientID = phisycalClient.ClientID,
                     };
 
                     LegalUserViewModel legalUserViewModel = null;
@@ -723,6 +726,7 @@ namespace BankAccount.Backend.Services.Implementations
                             СhiefFullname = legalUserClient.СhiefFullname,
                             AccountantFullname = legalUserClient.AccountantFullname,
                             FormOfOwnership = legalUserClient.FormOfOwnership,
+                            ClientID = legalUserClient.ClientID,
                         };
                     }
 
@@ -766,6 +770,7 @@ namespace BankAccount.Backend.Services.Implementations
                         СhiefFullname = legalUser.СhiefFullname,
                         AccountantFullname = legalUser.AccountantFullname,
                         FormOfOwnership = legalUser.FormOfOwnership,
+                        ClientID = legalUser.ClientID,
                     };
 
                     PhisycalUserViewModel phisycalUserViewModel = null;
@@ -777,13 +782,14 @@ namespace BankAccount.Backend.Services.Implementations
                             Lastname = phisycalUser.Lastname,
                             Name = phisycalUser.Name,
                             Middlename = phisycalUser.Middlename,
-                            Birthday = phisycalUser.Birthday,
+                            Birthday = phisycalUser.Birthday.ToString("dd/MM/yyyy"),
                             Address = phisycalUser.Address,
                             Number = phisycalUser.Number,
                             Gender = phisycalUser.Gender.GetDisplayName(),
                             Photo = phisycalUser.Photo,
                             IsStuff = phisycalUser.IsStuff,
                             IsDebtor = phisycalUser.IsDebtor,
+                            ClientID = phisycalUser.ClientID,
                         };
                     }
 

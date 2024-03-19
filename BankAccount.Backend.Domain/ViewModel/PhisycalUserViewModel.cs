@@ -1,4 +1,5 @@
-﻿using BankAccount.Backend.Domain.Enum;
+﻿using BankAccount.Backend.Domain.Entity;
+using BankAccount.Backend.Domain.Enum;
 using System.ComponentModel.DataAnnotations;
 
 namespace BankAccount.Backend.Domain.ViewModel
@@ -14,7 +15,7 @@ namespace BankAccount.Backend.Domain.ViewModel
         [Display(Name = "Отчество")]
         public string Middlename { get; set; }
         [Display(Name = "Дата рождения")]
-        public DateTime Birthday { get; set; }
+        public string Birthday { get; set; }
         [Display(Name = "Адрес")]
         public string Address { get; set; }
         [Display(Name = "Телефон")]
@@ -29,5 +30,6 @@ namespace BankAccount.Backend.Domain.ViewModel
         public bool IsStuff { get; set; }
         [Display(Name = "Является ли должником")]
         public bool IsDebtor { get; set; }
+        public int ClientID { get; set; }
     }
 }
