@@ -105,13 +105,12 @@ namespace BankAccount.Backend.Services.Implementations
 
                 legalUser = new LegalUserEntity
                 {
+                    Id = client.Id,
                     OrganizationName = model.OrganizationName,
                     Address = model.Address,
                     СhiefFullname = model.СhiefFullname,
                     AccountantFullname = model.AccountantFullname,
                     FormOfOwnership = model.FormOfOwnership,
-                    ClientID = client.Id,
-                    Client = client,
                 };
 
                 await _legalUserRepository.Create(legalUser);
@@ -165,6 +164,7 @@ namespace BankAccount.Backend.Services.Implementations
 
                 phisycalUser = new PhisycalUserEntity
                 {
+                    Id = client.Id,
                     Lastname = model.Lastname, 
                     Name = model.Name,
                     Middlename = model.Middlename,
@@ -176,8 +176,6 @@ namespace BankAccount.Backend.Services.Implementations
                     Photo = model.Photo,
                     IsStuff = model.IsStuff,
                     IsDebtor = false,
-                    ClientID = client.Id,
-                    Client = client,
                 };
 
                 await _phisycalUserRepository.Create(phisycalUser);
@@ -350,7 +348,6 @@ namespace BankAccount.Backend.Services.Implementations
                     СhiefFullname = x.СhiefFullname,
                     AccountantFullname = x.AccountantFullname,
                     FormOfOwnership = x.FormOfOwnership,
-                    ClientID = x.ClientID
                 }).ToListAsync();
 
                 return new BankResponse<IEnumerable<LegalUserViewModel>>
@@ -387,7 +384,6 @@ namespace BankAccount.Backend.Services.Implementations
                     Photo = x.Photo,
                     IsStuff = x.IsStuff,
                     IsDebtor = x.IsDebtor,
-                    ClientID = x.ClientID,
                 }).ToListAsync();
 
                 return new BankResponse<IEnumerable<PhisycalUserViewModel>>
@@ -511,7 +507,6 @@ namespace BankAccount.Backend.Services.Implementations
                 phisycalUser.Photo = phisycalUser.Photo == null ? phisycalUser.Photo : model.Photo;
                 phisycalUser.IsStuff = phisycalUser.IsStuff == null ? phisycalUser.IsStuff : model.IsStuff.Value;
                 phisycalUser.IsDebtor = phisycalUser.IsDebtor == null ? phisycalUser.IsDebtor : model.IsDebtor.Value;
-                phisycalUser.ClientID = phisycalUser.ClientID == null ? phisycalUser.ClientID : model.ClientID.Value;
 
                 await _phisycalUserRepository.Update(phisycalUser);
 
@@ -636,7 +631,6 @@ namespace BankAccount.Backend.Services.Implementations
                 phisycalUser.Photo = model.Photo;
                 phisycalUser.IsStuff = model.IsStuff.Value;
                 phisycalUser.IsDebtor = model.IsDebtor.Value;
-                phisycalUser.ClientID = model.ClientID.Value;
 
                 await _phisycalUserRepository.Update(phisycalUser);
 
@@ -695,8 +689,7 @@ namespace BankAccount.Backend.Services.Implementations
                         }
                     );
 
-                    var legalUserClient = await _legalUserRepository.GetAll()
-                        .FirstOrDefaultAsync(x => x.СhiefFullname.ToLower() == clientFullname);
+                    var legalUserClients = await _legalUserRepository.GetAll().Where(x => x.СhiefFullname.ToLower() == clientFullname).ToListAsync();
 
                     var phisycalClientViewModel = new PhisycalUserViewModel
                     {
@@ -711,28 +704,11 @@ namespace BankAccount.Backend.Services.Implementations
                         Photo = phisycalClient.Photo,
                         IsStuff = phisycalClient.IsStuff,
                         IsDebtor = phisycalClient.IsDebtor,
-                        ClientID = phisycalClient.ClientID,
                     };
-
-                    LegalUserViewModel legalUserViewModel = null;
-
-                    if (legalUserClient != null)
-                    {
-                        legalUserViewModel = new LegalUserViewModel
-                        {
-                            Id = legalUserClient.Id,
-                            OrganizationName = legalUserClient.OrganizationName,
-                            Address = legalUserClient.Address,
-                            СhiefFullname = legalUserClient.СhiefFullname,
-                            AccountantFullname = legalUserClient.AccountantFullname,
-                            FormOfOwnership = legalUserClient.FormOfOwnership,
-                            ClientID = legalUserClient.ClientID,
-                        };
-                    }
 
                     var clientViewModel = new ClientViewModel()
                     {
-                        LegalUser = legalUserViewModel,
+                        LegalUsers = legalUserClients,
                         PhisycalUser = phisycalClientViewModel,
                     };
 
@@ -744,8 +720,7 @@ namespace BankAccount.Backend.Services.Implementations
                 }
                 else
                 {
-                    var legalUser = await _legalUserRepository.GetAll()
-                        .FirstOrDefaultAsync(x => x.Id == id);
+                    var legalUser = await _legalUserRepository.GetAll().Where(x => x.Id == id).ToListAsync();
 
                     if (legalUser == null)
                     {
@@ -756,22 +731,11 @@ namespace BankAccount.Backend.Services.Implementations
                         };
                     }
 
-                    var clientFullname = legalUser.СhiefFullname.Split(" ");
+                    var clientFullname = legalUser[0].СhiefFullname.Split(" ");  
 
                     var phisycalUser = await _phisycalUserRepository.GetAll()
-                        .FirstOrDefaultAsync(x => x.Lastname.ToLower() == clientFullname[0].ToLower() && x.Name.ToLower() == clientFullname[1].ToLower() &&
-                            x.Middlename.ToLower() == clientFullname[2].ToLower());
-
-                    var legalClientViewModel = new LegalUserViewModel()
-                    {
-                        Id = legalUser.Id,
-                        OrganizationName = legalUser.OrganizationName,
-                        Address = legalUser.Address,
-                        СhiefFullname = legalUser.СhiefFullname,
-                        AccountantFullname = legalUser.AccountantFullname,
-                        FormOfOwnership = legalUser.FormOfOwnership,
-                        ClientID = legalUser.ClientID,
-                    };
+                            .FirstOrDefaultAsync(x => x.Lastname.ToLower() == clientFullname[0].ToLower() && x.Name.ToLower() == clientFullname[1].ToLower() &&
+                                x.Middlename.ToLower() == clientFullname[2].ToLower());
 
                     PhisycalUserViewModel phisycalUserViewModel = null;
                     if (phisycalUser != null)
@@ -789,13 +753,12 @@ namespace BankAccount.Backend.Services.Implementations
                             Photo = phisycalUser.Photo,
                             IsStuff = phisycalUser.IsStuff,
                             IsDebtor = phisycalUser.IsDebtor,
-                            ClientID = phisycalUser.ClientID,
                         };
                     }
 
                     var clientViewModel = new ClientViewModel()
                     {
-                        LegalUser = legalClientViewModel,
+                        LegalUsers = legalUser,
                         PhisycalUser = phisycalUserViewModel,
                     };
 
@@ -804,6 +767,7 @@ namespace BankAccount.Backend.Services.Implementations
                         Data = clientViewModel,
                         StatusCode = StatusCode.Ok,
                     };
+
                 }
             }
             catch (Exception exception)

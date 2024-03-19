@@ -1,12 +1,14 @@
 ﻿using BankAccount.Backend.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BankAccount.Backend.Domain.Entity
 {
     public class LegalUserEntity
     {
         [Comment("Legal entity ID")]
+        [Key, ForeignKey("Client")]
         public int Id { get; set; }
 
         [Comment("Name of the organization of the legal entity")]
@@ -29,7 +31,6 @@ namespace BankAccount.Backend.Domain.Entity
         public FormOfOwnership FormOfOwnership { get; set; }
 
         [Comment("Client ID assigned to a legal entity")]
-        public int ClientID {  get; set; }
-        public ClientEntity? Client { get; set; }
+        public virtual ClientEntity Client { get; set; }
     }
 }

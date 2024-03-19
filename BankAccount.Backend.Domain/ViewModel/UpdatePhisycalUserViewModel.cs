@@ -16,6 +16,5 @@ namespace BankAccount.Backend.Domain.ViewModel
         public string? Photo { get; set; }
         public bool? IsStuff { get; set; }
         public bool? IsDebtor { get; set; }
-        public int? ClientID { get; set; }
     }
 }

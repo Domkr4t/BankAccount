@@ -1,6 +1,4 @@
-﻿using BankAccount.Backend.Domain.Entity;
-using BankAccount.Backend.Domain.Enum;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace BankAccount.Backend.Domain.ViewModel
 {
@@ -30,6 +28,5 @@ namespace BankAccount.Backend.Domain.ViewModel
         public bool IsStuff { get; set; }
         [Display(Name = "Является ли должником")]
         public bool IsDebtor { get; set; }
-        public int ClientID { get; set; }
     }
 }

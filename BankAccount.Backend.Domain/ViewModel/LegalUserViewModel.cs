@@ -18,6 +18,5 @@ namespace BankAccount.Backend.Domain.ViewModel
         public string AccountantFullname { get; set; }
         [Display(Name = "Форма собственности")]
         public FormOfOwnership FormOfOwnership { get; set; }
-        public int ClientID { get; set; }
     }
 }

@@ -8,7 +8,8 @@ namespace BankAccount.Backend.Domain.Entity
     public class PhisycalUserEntity
     {
         [Comment("Individual ID")]
-        public int Id {  get; set; }
+        [Key, ForeignKey("Client")]
+        public int Id { get; set; }
 
         [Comment("Lastname of individual")]
         [StringLength(40)]
@@ -49,9 +50,6 @@ namespace BankAccount.Backend.Domain.Entity
 
         [Comment("Is an individual a debtor")]
         public bool IsDebtor { get; set; }
-
-        [Comment("Client ID that is assigned to an individual")]
-        public int ClientID { get; set; }
-        public ClientEntity? Client { get; set; }
+        public virtual ClientEntity Client { get; set; }
     }
 }
